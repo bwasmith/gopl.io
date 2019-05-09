@@ -12,21 +12,54 @@ import (
 	"os"
 	"strconv"
 
+	"gopl.io/ch2/lenconv"
 	"gopl.io/ch2/tempconv"
 )
 
 func main() {
-	for _, arg := range os.Args[1:] {
-		t, err := strconv.ParseFloat(arg, 64)
+	if len(os.Args) < 3 {
+		fmt.Fprintf(os.Stderr, "cf: no arguments given.\nUsage: cf TYPE NUM [NUM...]\n")
+		os.Exit(1)
+	}
+
+	t := os.Args[1]
+	nums := stringToFloats(os.Args[2:])
+
+	switch t {
+	case "temp":
+		convertTemp(nums)
+	case "dist":
+		convertDist(nums)
+	}
+}
+
+func stringToFloats(s []string) []float64 {
+	nums := make([]float64, len(s))
+	for i, s := range s {
+		n, err := strconv.ParseFloat(s, 64)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "cf: %v\n", err)
 			os.Exit(1)
 		}
-		f := tempconv.Fahrenheit(t)
-		c := tempconv.Celsius(t)
+		nums[i] = n
+	}
+	return nums
+}
+
+func convertDist(nums []float64) {
+	for _, n := range nums {
+		mi := lenconv.Mile(n)
+		km := lenconv.Kilometer(n)
+		fmt.Printf("%s = %s, %s = %s\n",
+			mi, lenconv.MiToKm(mi), km, lenconv.KmToMi(km))
+	}
+}
+
+func convertTemp(nums []float64) {
+	for _, n := range nums {
+		f := tempconv.Fahrenheit(n)
+		c := tempconv.Celsius(n)
 		fmt.Printf("%s = %s, %s = %s\n",
 			f, tempconv.FToC(f), c, tempconv.CToF(c))
 	}
 }
-
-//!-
